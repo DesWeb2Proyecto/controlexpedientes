@@ -29,7 +29,7 @@ export default function NavBar() {
           {/* Mostrar el nombre del usuario logueado y botón de cerrar sesión */}
           {usuarioLogueado ? (
             <div className="d-flex align-items-center">
-              <span className="me-3">Bienvenido, {usuarioLogueado.nombre_usuario}</span>
+              <span className="me-3">Bienvenid@, {usuarioLogueado.nombre_completo}</span>
               <button className="btn btn-outline-danger btn-sm" onClick={cerrarSesion}>Cerrar Sesión</button>
             </div>
           ) : null}
