@@ -13,15 +13,6 @@ export default function ListaUsuarioComponent({Usuarios}:UsuarioLista) {
 
   const {actualizarUsuario,eliminarUsuario,usuario,id_usuario,nombre_usuario,nombre_completo,contrasena,unidad_area,administrador,
     setId,setContrasena,setNombreUsuario,setNombreCompleto,setUnidadArea,setAdministrador,logearUsuario} =useUsuarioContext();
-  /*
-  if (Array.isArray(usuarios)) {
-    usuarios.map((user:Usuario) => {
-      // tu código aquí
-    });
-  } else {
-    console.error("usuarios no es un array");
-  }
- */
 
   return (
     <div>

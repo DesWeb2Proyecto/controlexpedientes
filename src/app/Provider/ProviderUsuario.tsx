@@ -25,6 +25,28 @@ export default function ProviderUsuario({ children }: VistaReact) {
   }, []);
 
   useEffect(() => {
+    const usuarioGuardado = localStorage.getItem('usuarioLogueado');
+    if (usuarioGuardado) {
+      const datos = JSON.parse(usuarioGuardado);
+      setUsuarioLogueado(datos);
+      setId(datos.id_usuario);
+      setNombreUsuario(datos.nombre_usuario);
+      setContrasena(datos.contrasena);
+      setNombreCompleto(datos.nombre_completo);
+      setUnidadArea(datos.unidad_area);
+      setAdministrador(datos.administrador);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (usuarioLogueado) {
+      localStorage.setItem('usuarioLogueado', JSON.stringify(usuarioLogueado));
+    } else {
+      localStorage.removeItem('usuarioLogueado');
+    }
+  }, [usuarioLogueado]);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       if (!usuarioLogueado && window.location.pathname !== '/') {
         router.replace('/');
@@ -80,6 +102,7 @@ export default function ProviderUsuario({ children }: VistaReact) {
     setNombreCompleto('');
     setUnidadArea('');
     setAdministrador(false);
+    localStorage.removeItem('usuarioLogueado');
     router.push('/');
   }
 

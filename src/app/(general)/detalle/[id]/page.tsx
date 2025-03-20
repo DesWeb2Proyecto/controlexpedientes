@@ -1,12 +1,12 @@
 'use client'
-import { useUsuaarioContext } from '@/app/Provider/ProviderUsuario'
+import { useUsuarioContext } from '@/app/Provider/ProviderUsuario'
 import { useParams } from 'next/navigation'
 import React from 'react'
 
 export default function page() {
 
   const {id_usuario} = useParams()
-  const {usuario}= useUsuaarioContext()
+  const {usuario}= useUsuarioContext()
 
   const usuarioDetalle= usuario.find((user)=> user.id_usuario==Number(id_usuario))
 
