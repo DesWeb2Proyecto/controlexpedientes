@@ -19,3 +19,18 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.hover-effect:hover {
+  background-color: rgba(6, 245, 253, 0.616); /* Fondo semitransparente */
+  border-radius: 5px; /* Bordes redondeados */
+  transition: background-color 0.3s ease-in-out; /* Suavizar la transición */
+}
+
+.hover-effect {
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.nav-link.active {
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+}
