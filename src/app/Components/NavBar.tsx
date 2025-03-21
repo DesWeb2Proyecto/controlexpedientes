@@ -16,13 +16,10 @@ export default function NavBar() {
           </button>
           <ul className="nav navbar-nav">
             <li className="nav-item">
-              <Link href='/listausuario' className="nav-link active">Lista Usuario</Link>
+              <Link href='/paginaPrincipal' className="nav-link active">Inicio</Link>
             </li>
             <li className="nav-item">
-              <Link href='/agregarusuario' className="nav-link active">Crear Usuario</Link>
-            </li>
-            <li className="nav-item">
-              <Link href='/listaexpediente' className="nav-link active">Lista-expediente</Link>
+              <Link href='/listaexpediente' className="nav-link active">Lista de expedientes</Link>
             </li>
           </ul>
           

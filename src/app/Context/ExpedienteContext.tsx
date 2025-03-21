@@ -1,3 +1,4 @@
+'use client'
 import { createContext } from 'react';
 import { Expediente } from '../Models/Expediente';
 
@@ -7,7 +8,8 @@ interface ExpedienteContextType {
   obtenerExpedientes: () => Promise<void>;
   obtenerExpedientePorNumero: (numero_expediente: string) => Promise<void>;
   obtenerExpedientesPorUnidad: (unidad: string) => Promise<void>;
-  crearExpediente: (expediente: Omit<Expediente, 'id_expediente' | 'fecha_creacion'>) => Promise<void>;
+  obtenerExpedientesPorUsuario: (id_usuario: number) => Promise<void>; // <-- Agregado aquí
+  crearExpediente: (expediente: Omit<Expediente, "id_expediente" | "fecha_creacion">) => Promise<void>;
   editarExpediente: (id: number, expediente: Partial<Expediente>) => Promise<void>;
   transferirExpediente: (id: number, nueva_unidad: string, id_usuario: number) => Promise<void>;
   expedienteSeleccionado: Expediente | null;
@@ -20,6 +22,7 @@ export const expedienteContext = createContext<ExpedienteContextType>({
   obtenerExpedientes: async () => {},
   obtenerExpedientePorNumero: async () => {},
   obtenerExpedientesPorUnidad: async () => {},
+  obtenerExpedientesPorUsuario: async () => {}, // <-- Agregado aquí
   crearExpediente: async () => {},
   editarExpediente: async () => {},
   transferirExpediente: async () => {},

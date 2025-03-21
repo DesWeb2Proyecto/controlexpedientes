@@ -27,14 +27,19 @@ export default function ProviderUsuario({ children }: VistaReact) {
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem('usuarioLogueado');
     if (usuarioGuardado) {
-      const datos = JSON.parse(usuarioGuardado);
-      setUsuarioLogueado(datos);
-      setId(datos.id_usuario);
-      setNombreUsuario(datos.nombre_usuario);
-      setContrasena(datos.contrasena);
-      setNombreCompleto(datos.nombre_completo);
-      setUnidadArea(datos.unidad_area);
-      setAdministrador(datos.administrador);
+      try {
+        const datos: Usuario = JSON.parse(usuarioGuardado);
+
+        setUsuarioLogueado(datos);
+        setId(datos.id_usuario ?? 0);
+        setNombreUsuario(datos.nombre_usuario ?? "");
+        setContrasena(datos.contrasena ?? "");
+        setNombreCompleto(datos.nombre_completo ?? "");
+        setUnidadArea(datos.unidad_area ?? "");
+        setAdministrador(datos.administrador ?? false);
+      } catch (error) {
+        console.error("Error al cargar usuario desde localStorage:", error);
+      }
     }
   }, []);
 
@@ -81,12 +86,12 @@ export default function ProviderUsuario({ children }: VistaReact) {
 
       const data = await res.json();
       setUsuarioLogueado(data);
-      setId(data.id_usuario);
-      setNombreUsuario(data.nombre_usuario);
-      setContrasena(data.contrasena);
-      setNombreCompleto(data.nombre_completo);
-      setUnidadArea(data.unidad_area);
-      setAdministrador(data.administrador);
+      setId(data.id_usuario ?? 0);
+      setNombreUsuario(data.nombre_usuario ?? "");
+      setContrasena(data.contrasena ?? "");
+      setNombreCompleto(data.nombre_completo ?? "");
+      setUnidadArea(data.unidad_area ?? "");
+      setAdministrador(data.administrador ?? false);
 
       router.push('/listausuario');
     } catch (error) {

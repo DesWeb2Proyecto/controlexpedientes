@@ -129,7 +129,7 @@ app.get("/expedientes/unidad/:unidad", async (req, res) => {
   }
 });
 
-
+//crear expediente
 app.post("/expedientes", async (req, res) => {
   try {
       const {
@@ -173,46 +173,24 @@ app.post("/expedientes", async (req, res) => {
 });
 
 
-//editar expediente
-app.post("/expedientes", async (req, res) => {
+// Obtener expedientes asociados a un usuario
+app.get("/expedientes/usuario/:id", async (req, res) => {
   try {
-    const {
-      numero_expediente,
-      nombre_establecimiento,
-      region_sanitaria,
-      departamento,
-      unidad_area,
-      estado,
-      id_usuario
-    } = req.body;
+    const { id } = req.params;
 
-    // Validaciones básicas
-    if (!numero_expediente || !nombre_establecimiento || !region_sanitaria || !departamento || !unidad_area || !id_usuario) {
-      return res.status(400).json({ error: "Todos los campos son obligatorios." });
-    }
-
-    // Verificar si el expediente ya existe
-    const expedienteExiste = await Expedientes.findOne({ where: { numero_expediente } });
-    if (expedienteExiste) {
-      return res.status(400).json({ error: "El número de expediente ya existe." });
-    }
-
-    // Crear expediente en la base de datos
-    const nuevoExpediente = await Expedientes.create({
-      numero_expediente,
-      nombre_establecimiento,
-      region_sanitaria,
-      departamento,
-      unidad_area,
-      estado: estado ?? true, // Si no se envía, será `true` por defecto
-      fecha_creacion: new Date(),
-      id_usuario
+    // Buscar los expedientes que pertenecen al usuario
+    const expedientes = await Expedientes.findAll({
+      where: { id_usuario: id }, // Filtrar por el ID del usuario
     });
 
-    return res.status(201).json({ message: "Expediente creado exitosamente", expediente: nuevoExpediente });
+    if (!expedientes || expedientes.length === 0) {
+      return res.status(404).json({ mensaje: "No se encontraron expedientes para este usuario" });
+    }
+
+    res.json(expedientes);
   } catch (error) {
-    console.error("Error al crear el expediente:", error.message);
-    return res.status(500).json({ error: error.message });
+    console.error("Error al obtener expedientes:", error);
+    res.status(500).json({ mensaje: "Error interno del servidor" });
   }
 });
 
@@ -308,36 +286,46 @@ app.get("/historial/expediente/:numero_expediente", async (req, res) => {
 });
 
 
-//expedientes e historial por usuario
-app.get("/historial/expedientes/:id_usuario", async (req, res) => {
+// Historial de un usuario con los expedientes en los que ha participado
+app.get("/historial/usuario/:id_usuario", async (req, res) => {
   const { id_usuario } = req.params;
 
   try {
-    const expedientes = await Expedientes.findAll({
-      where: { id_usuario }, // Filtra expedientes por usuario
+    const historialUsuario = await Historial.findAll({
+      where: { id_usuario }, // Filtra los registros del historial por el usuario
+      attributes: ["id", "id_expediente", "id_usuario", "fecha_transferencia", "comentario"], // Incluye comentario
       include: [
         {
-          model: Historial, // Incluye el historial de transferencias
-          include: [
-            {
-              model: Users, // Muestra el usuario que hizo la transferencia
-              attributes: ["id_usuario", "nombre_completo", "nombre_usuario"]
-            }
-          ]
-        }
-      ]
+          model: Expedientes, // Incluye información del expediente
+          attributes: [
+            "id_expediente",
+            "numero_expediente",
+            "nombre_establecimiento",
+            "region_sanitaria",
+            "departamento",
+            "unidad_area",
+            "estado",
+            "fecha_creacion",
+          ],
+        },
+        {
+          model: Users, // Incluye información del usuario que realizó la transferencia
+          attributes: ["id_usuario", "nombre_completo", "nombre_usuario"],
+        },
+      ],
     });
 
-    if (!expedientes.length) {
-      return res.status(404).json({ mensaje: "No hay expedientes asociados a este usuario." });
+    if (!historialUsuario.length) {
+      return res.status(404).json({ mensaje: "No hay registros en el historial para este usuario." });
     }
 
-    res.json(expedientes);
+    res.json(historialUsuario);
   } catch (error) {
-    console.error("Error al obtener expedientes con historial:", error);
+    console.error("Error al obtener el historial del usuario:", error);
     res.status(500).json({ error: "Error en la consulta.", error });
   }
 });
+
 
 //historial detallado con datos del usuario y el expediente
 app.get("/historial/detallado", async (req, res) => {

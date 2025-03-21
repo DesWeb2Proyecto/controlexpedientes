@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUsuarioContext } from './Provider/ProviderUsuario';
 import { useRouter } from 'next/navigation';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -7,13 +7,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 export default function Page() {
   const router = useRouter();
   const { nombre_usuario, setNombreUsuario, contrasena, setContrasena, logearUsuario, usuarioLogueado } = useUsuarioContext();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    console.log('usuarioLogueado:', usuarioLogueado);
-    if (usuarioLogueado) {
-      router.push('/listausuario');
+    setIsClient(true); // Marca que el componente ya está montado en el cliente
+  }, []);
+
+  useEffect(() => {
+    if (isClient && usuarioLogueado) {
+      router.push('/paginaPrincipal');
     }
-  }, [usuarioLogueado, router]);
+  }, [isClient, usuarioLogueado, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +25,12 @@ export default function Page() {
       alert('Por favor, complete todos los campos.');
       return;
     }
-    await logearUsuario({ nombre_usuario, contrasena } as any);
+    logearUsuario({ nombre_usuario, contrasena } as any);
   };
+
+  if (!isClient) {
+    return null; // Evita el error de hidratación mostrando nada hasta que el cliente cargue
+  }
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">

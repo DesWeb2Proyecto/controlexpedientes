@@ -11,7 +11,7 @@ export const historialContext = createContext({
   // 🔹 Funciones para obtener datos del historial desde el backend
   obtenerHistorial: () => {}, // Obtiene todos los registros de historial
   obtenerHistorialExpediente: (numero_expediente: string) => {}, // Obtiene historial de un expediente específico
-  obtenerHistorialPorUsuario: (id_usuario: number) => {}, // Obtiene historial de expedientes de un usuario
+  obtenerHistorialDeUsuario: (id_usuario: number) => {}, // Obtiene historial de expedientes de un usuario
   obtenerHistorialDetallado: () => {}, // Obtiene historial detallado con información de usuarios y expedientes
 
   // 🔹 Variables y funciones para manejar los datos de un historial específico

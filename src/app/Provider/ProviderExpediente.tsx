@@ -99,6 +99,18 @@ export const ProviderExpediente: React.FC<ProviderExpedienteProps> = ({ children
     }
   };
 
+  // Obtener expedientes por usuario
+const obtenerExpedientesPorUsuario = async (id_usuario: number): Promise<void> => {
+  try {
+    const res = await fetch(`http://localhost:5000/expedientes/usuario/${id_usuario}`);
+    if (!res.ok) throw new Error("No se pudieron obtener los expedientes del usuario.");
+    const data = await res.json();
+    setExpedientes(data);
+  } catch (error) {
+    console.error("Error al obtener expedientes del usuario:", error);
+  }
+};
+
   // Valor del contexto
   const contextValue = {
     expedientes,
@@ -106,6 +118,7 @@ export const ProviderExpediente: React.FC<ProviderExpedienteProps> = ({ children
     obtenerExpedientes,
     obtenerExpedientePorNumero,
     obtenerExpedientesPorUnidad,
+    obtenerExpedientesPorUsuario,
     crearExpediente,
     editarExpediente,
     transferirExpediente,
