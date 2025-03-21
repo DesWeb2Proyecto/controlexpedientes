@@ -2,9 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUsuarioContext } from '@/app/Provider/ProviderUsuario';
-import IngresarExpedienteComponent from '@/app/Components/IngresarExpedienteComponent';
-import HistorialPorUsuarioComponent from '@/app/Components/HistorialPorUsuarioComponent';
-
+import HistorialDetalladoComponent from '@/app/Components/HistorialDetalladoComponent';
+import GraficaExpedientesComponent from '@/app/Components/GraficaexpedienteComponent';
 
 export default function Page() {
   const { usuarioLogueado } = useUsuarioContext();
@@ -26,18 +25,10 @@ export default function Page() {
     return null; // No renderiza nada hasta verificar la autenticación
   }
 
-  // Callback que se invoca cuando se crea un expediente para forzar remount
-  const handleExpedienteCreado = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
-
   return (
     <>
-      {(usuarioLogueado.unidad_area === "UAC" || usuarioLogueado.administrador) && (
-        <IngresarExpedienteComponent key={`exp-${refreshKey}`} onExpedienteCreado={handleExpedienteCreado} />
-      )}
-      <HistorialPorUsuarioComponent key={`hist-${refreshKey}`} />
-
+        <HistorialDetalladoComponent key={`hist-${refreshKey}`} />
+        <GraficaExpedientesComponent key={`gra-${refreshKey}`} />
     </>
   );
 }

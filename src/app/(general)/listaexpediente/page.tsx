@@ -4,6 +4,7 @@ import React from 'react'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUsuarioContext } from '@/app/Provider/ProviderUsuario';
+import HistorialExpedienteComponent from '@/app/Components/HistorialExpedienteComponent';
 
 export default function page() {
   const { usuarioLogueado } = useUsuarioContext();
@@ -28,6 +29,7 @@ export default function page() {
   return (
     <>
       <ExpedientesUsuarioComponent></ExpedientesUsuarioComponent>
+      <HistorialExpedienteComponent></HistorialExpedienteComponent>
     </>
   )
 }

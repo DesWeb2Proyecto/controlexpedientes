@@ -16,15 +16,23 @@ export default function NavBar() {
 
   // Lista de enlaces para escalabilidad
   const navLinks = [
-    { href: '/paginaPrincipal', label: 'Inicio' },
-    { href: '/listaexpediente', label: 'Lista de expedientes' },
+    { href: "/paginaPrincipal", label: "Inicio" },
+    { href: "/listaexpediente", label: "Lista de expedientes" },
+    { href: "/historialgeneral", label: "Historial General" },
   ];
+
+  // Filtrar el enlace "Historial General" si el usuario no es administrador
+  const filteredNavLinks = navLinks.filter(link => {
+    if (link.label === "Historial General") {
+      return usuarioLogueado?.administrador; 
+    }
+    return true;
+  });
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow">
       <div className="container-fluid">
         {/* Logo o marca */}
-        
 
         {/* Botón para dispositivos móviles */}
         <button
@@ -42,9 +50,11 @@ export default function NavBar() {
         {/* Menú de navegación */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
-            {navLinks.map(({ href, label }) => (
+            {filteredNavLinks.map(({ href, label }) => (
               <li className="nav-item" key={href}>
-                <Link className={getNavLinkClass(href)} href={href}>{label}</Link>
+                <Link className={getNavLinkClass(href)} href={href}>
+                  {label}
+                </Link>
               </li>
             ))}
           </ul>
@@ -52,8 +62,12 @@ export default function NavBar() {
           {/* Usuario logueado y botón de cerrar sesión */}
           {usuarioLogueado && (
             <div className="d-flex align-items-center">
-              <span className="text-white me-3 fw-semibold">Bienvenid@, {usuarioLogueado.nombre_completo}</span>
-              <button className="btn btn-outline-light btn-sm" onClick={cerrarSesion}>Cerrar Sesión</button>
+              <span className="text-white me-3 fw-semibold">
+                Bienvenid@, {usuarioLogueado.nombre_completo}
+              </span>
+              <button className="btn btn-outline-light btn-sm" onClick={cerrarSesion}>
+                Cerrar Sesión
+              </button>
             </div>
           )}
         </div>

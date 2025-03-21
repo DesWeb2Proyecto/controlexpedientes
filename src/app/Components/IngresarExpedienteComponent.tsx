@@ -1,29 +1,36 @@
+'use client'
 import React, { useState, useEffect } from 'react';
 import { useExpedienteContext } from '../Provider/ProviderExpediente';
 import { useUsuarioContext } from '../Provider/ProviderUsuario';
+import { useRouter } from 'next/navigation';
 
-const IngresarExpediente = () => {
+interface IngresarExpedienteProps {
+  onExpedienteCreado: () => void;
+}
+
+const IngresarExpedienteComponent: React.FC<IngresarExpedienteProps> = ({ onExpedienteCreado }) => {
   const { crearExpediente } = useExpedienteContext();
   const { usuarioLogueado } = useUsuarioContext();
+  const router = useRouter();
 
   // Estado para manejar los datos del formulario
   const [formData, setFormData] = useState({
     numero_expediente: '',
     nombre_establecimiento: '',
-    region_sanitaria: '', // Cambiado a string para manejar el input
+    region_sanitaria: '',
     departamento: '',
     unidad_area: '',
     estado: true, // Siempre activo
-    id_usuario: '', // Cambiado a string para manejar el input
+    id_usuario: '',
   });
 
-  // Efecto para autocompletar unidad_area e id_usuario con los datos del usuario logueado
+  // Autocompletar unidad_area e id_usuario con los datos del usuario logueado
   useEffect(() => {
     if (usuarioLogueado) {
       setFormData((prev) => ({
         ...prev,
         unidad_area: usuarioLogueado.unidad_area,
-        id_usuario: usuarioLogueado.id_usuario.toString(), // Convertir a string
+        id_usuario: usuarioLogueado.id_usuario.toString(),
       }));
     }
   }, [usuarioLogueado]);
@@ -41,7 +48,7 @@ const IngresarExpediente = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validar que todos los campos estén llenos
+    // Validar que todos los campos estén completos
     if (
       !formData.numero_expediente ||
       !formData.nombre_establecimiento ||
@@ -58,30 +65,36 @@ const IngresarExpediente = () => {
     const nuevoExpediente = {
       numero_expediente: formData.numero_expediente,
       nombre_establecimiento: formData.nombre_establecimiento,
-      region_sanitaria: parseInt(formData.region_sanitaria, 10), // Convertir a número
+      region_sanitaria: parseInt(formData.region_sanitaria, 10),
       departamento: formData.departamento,
       unidad_area: formData.unidad_area,
-      estado: formData.estado, // Siempre activo
-      id_usuario: parseInt(formData.id_usuario, 10), // Convertir a número
+      estado: formData.estado,
+      id_usuario: parseInt(formData.id_usuario, 10),
     };
 
-    console.log('Datos a enviar:', nuevoExpediente); // Verifica los datos antes de enviar
+    console.log('Datos a enviar:', nuevoExpediente);
 
     try {
-      // Llamar a la función crearExpediente del contexto
+      // Crear el expediente
       await crearExpediente(nuevoExpediente);
       alert('Expediente creado con éxito.');
 
-      // Limpiar el formulario después de crear el expediente
+      // Limpiar el formulario (manteniendo la unidad e id del usuario logueado)
       setFormData({
         numero_expediente: '',
         nombre_establecimiento: '',
-        region_sanitaria: '', // Restaurar como string
+        region_sanitaria: '',
         departamento: '',
-        unidad_area: usuarioLogueado?.unidad_area ?? '', // Restaurar unidad_area del usuario logueado
-        estado: true, // Siempre activo
-        id_usuario: usuarioLogueado?.id_usuario.toString() ?? '', // Restaurar id_usuario como string
+        unidad_area: usuarioLogueado?.unidad_area ?? '',
+        estado: true,
+        id_usuario: usuarioLogueado?.id_usuario.toString() ?? '',
       });
+
+      // Llamar al callback para notificar que se creó un expediente
+      onExpedienteCreado();
+
+      // Forzar el remount de la página actual (refrescando la página)
+      router.refresh();
     } catch (error) {
       console.error('Error al crear expediente:', error);
       alert('Ocurrió un error, inténtelo de nuevo.');
@@ -153,7 +166,7 @@ const IngresarExpediente = () => {
                 onChange={handleChange}
                 className="form-control"
                 required
-                disabled // Deshabilitado porque se autocompleta con el usuario logueado
+                disabled
               />
             </div>
 
@@ -166,7 +179,7 @@ const IngresarExpediente = () => {
                 onChange={handleChange}
                 className="form-control"
                 required
-                disabled // Deshabilitado porque se autocompleta con el usuario logueado
+                disabled
               />
             </div>
 
@@ -175,9 +188,9 @@ const IngresarExpediente = () => {
               <input
                 type="text"
                 name="estado"
-                value="Activo" // Siempre activo
+                value="Activo"
                 className="form-control"
-                disabled // Deshabilitado porque no se puede cambiar
+                disabled
               />
             </div>
 
@@ -191,4 +204,4 @@ const IngresarExpediente = () => {
   );
 };
 
-export default IngresarExpediente;
+export default IngresarExpedienteComponent;

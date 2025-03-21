@@ -27,7 +27,6 @@ const HistorialPorUsuarioComponent = () => {
                 <table className="table table-striped">
                   <thead>
                     <tr>
-                      <th>ID</th>
                       <th>Número Expediente</th>
                       <th>Nombre Establecimiento</th>
                       <th>Región Sanitaria</th>
@@ -40,7 +39,6 @@ const HistorialPorUsuarioComponent = () => {
                   <tbody>
                     {historial.map((item: Historial) => (
                       <tr key={item.id}>
-                        <td>{item.id}</td>
                         <td>{item.Expediente?.numero_expediente || "N/A"}</td>
                         <td>{item.Expediente?.nombre_establecimiento || "N/A"}</td>
                         <td>{item.Expediente?.region_sanitaria || "N/A"}</td>

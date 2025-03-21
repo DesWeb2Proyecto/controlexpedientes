@@ -80,12 +80,10 @@ const ExpedientesUsuario: React.FC = () => {
   const ejecutarTransferencia = async () => {
     if (expedienteTransferencia && usuarioSeleccionado) {
       try {
-        // Aquí se llama al método del provider usando el ID del expediente,
-        // la unidad del usuario destino y el ID del usuario destino.
         await transferirExpediente(
           expedienteTransferencia.id_expediente,
-          usuarioSeleccionado.unidad_area,
-          usuarioSeleccionado.id_usuario
+          usuarioSeleccionado.unidad_area, // Se usa la unidad del usuario destino
+          usuarioSeleccionado.id_usuario   // Se usa el ID del usuario destino
         );
         await obtenerExpedientesPorUsuario(usuarioLogueado?.id_usuario || 0);
         cerrarModalTransferencia();
@@ -103,15 +101,24 @@ const ExpedientesUsuario: React.FC = () => {
     <div className="container mt-4">
       {/* Mensaje de éxito */}
       {mensajeExito && (
-        <div className="alert alert-success alert-dismissible fade show" role="alert">
+        <div
+          className="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
           {mensajeExito}
-          <button type="button" className="btn-close" onClick={() => setMensajeExito(null)}></button>
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setMensajeExito(null)}
+          ></button>
         </div>
       )}
 
       <div className="card">
         <div className="card-header bg-primary text-white">
-          <h2 className="m-0">Expedientes de {usuarioLogueado?.nombre_completo}</h2>
+          <h2 className="m-0">
+            Expedientes de {usuarioLogueado?.nombre_completo}
+          </h2>
         </div>
         <div className="card-body">
           <h4 className="mb-3">Historial del Usuario</h4>
@@ -143,10 +150,16 @@ const ExpedientesUsuario: React.FC = () => {
                       <td>{exp.estado ? "Activo" : "Finalizado"}</td>
                       <td>{new Date(exp.fecha_creacion).toLocaleString()}</td>
                       <td>
-                        <button className="btn btn-warning btn-sm me-2" onClick={() => abrirModalEdicion(exp)}>
+                        <button
+                          className="btn btn-warning btn-sm me-2"
+                          onClick={() => abrirModalEdicion(exp)}
+                        >
                           Editar
                         </button>
-                        <button className="btn btn-success btn-sm" onClick={() => abrirModalTransferencia(exp)}>
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => abrirModalTransferencia(exp)}
+                        >
                           Transferir
                         </button>
                       </td>
@@ -163,41 +176,83 @@ const ExpedientesUsuario: React.FC = () => {
 
       {/* Modal de edición */}
       {expedienteEditando && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal fade show d-block"
+          tabIndex={-1}
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header bg-primary text-white">
                 <h5 className="modal-title">Editar Expediente</h5>
-                <button type="button" className="btn-close" onClick={cerrarModal}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={cerrarModal}
+                ></button>
               </div>
               <div className="modal-body">
                 <div className="mb-3">
                   <label className="form-label">Número Expediente</label>
-                  <input type="text" className="form-control" name="numero_expediente" value={formExpediente.numero_expediente || ''} onChange={manejarCambio} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="numero_expediente"
+                    value={formExpediente.numero_expediente || ""}
+                    onChange={manejarCambio}
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Nombre Establecimiento</label>
-                  <input type="text" className="form-control" name="nombre_establecimiento" value={formExpediente.nombre_establecimiento || ''} onChange={manejarCambio} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="nombre_establecimiento"
+                    value={formExpediente.nombre_establecimiento || ""}
+                    onChange={manejarCambio}
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Región Sanitaria</label>
-                  <input type="number" className="form-control" name="region_sanitaria" value={formExpediente.region_sanitaria || ''} onChange={manejarCambio} />
+                  <input
+                    type="number"
+                    className="form-control"
+                    name="region_sanitaria"
+                    value={formExpediente.region_sanitaria || ""}
+                    onChange={manejarCambio}
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Departamento</label>
-                  <input type="text" className="form-control" name="departamento" value={formExpediente.departamento || ''} onChange={manejarCambio} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="departamento"
+                    value={formExpediente.departamento || ""}
+                    onChange={manejarCambio}
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Estado</label>
-                  <select className="form-select" name="estado" value={formExpediente.estado ? "true" : "false"} onChange={manejarCambio}>
+                  <select
+                    className="form-select"
+                    name="estado"
+                    value={formExpediente.estado ? "true" : "false"}
+                    onChange={manejarCambio}
+                    disabled={usuarioLogueado?.unidad_area !== "UAC" && !usuarioLogueado?.administrador}
+                  >
                     <option value="true">Activo</option>
                     <option value="false">Finalizado</option>
                   </select>
                 </div>
               </div>
               <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={cerrarModal}>Cancelar</button>
-                <button className="btn btn-primary" onClick={guardarEdicion}>Guardar Cambios</button>
+                <button className="btn btn-secondary" onClick={cerrarModal}>
+                  Cancelar
+                </button>
+                <button className="btn btn-primary" onClick={guardarEdicion}>
+                  Guardar Cambios
+                </button>
               </div>
             </div>
           </div>
@@ -206,25 +261,49 @@ const ExpedientesUsuario: React.FC = () => {
 
       {/* Modal de transferencia */}
       {expedienteTransferencia && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal fade show d-block"
+          tabIndex={-1}
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header bg-primary text-white">
                 <h5 className="modal-title">Transferir Expediente</h5>
-                <button type="button" className="btn-close" onClick={cerrarModalTransferencia}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={cerrarModalTransferencia}
+                ></button>
               </div>
               <div className="modal-body">
                 <div className="mb-3">
                   <label className="form-label">Usuario Actual</label>
-                  <input type="text" className="form-control" value={usuarioLogueado?.nombre_completo} disabled />
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={usuarioLogueado?.nombre_completo}
+                    disabled
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Unidad Actual</label>
-                  <input type="text" className="form-control" value={usuarioLogueado?.unidad_area} disabled />
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={usuarioLogueado?.unidad_area}
+                    disabled
+                  />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Seleccionar Usuario Destino</label>
-                  <select className="form-select" onChange={manejarSeleccionUsuario} value={usuarioSeleccionado?.id_usuario || ""}>
+                  <label className="form-label">
+                    Seleccionar Usuario Destino
+                  </label>
+                  <select
+                    className="form-select"
+                    onChange={manejarSeleccionUsuario}
+                    value={usuarioSeleccionado?.id_usuario || ""}
+                  >
                     <option value="">Seleccione un usuario</option>
                     {usuarios.map((user) => (
                       <option key={user.id_usuario} value={user.id_usuario}>
@@ -237,18 +316,38 @@ const ExpedientesUsuario: React.FC = () => {
                   <>
                     <div className="mb-3">
                       <label className="form-label">Usuario Destino</label>
-                      <input type="text" className="form-control" value={usuarioSeleccionado.nombre_completo} disabled />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={usuarioSeleccionado.nombre_completo}
+                        disabled
+                      />
                     </div>
                     <div className="mb-3">
                       <label className="form-label">Unidad del Usuario</label>
-                      <input type="text" className="form-control" value={usuarioSeleccionado.unidad_area} disabled />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={usuarioSeleccionado.unidad_area}
+                        disabled
+                      />
                     </div>
                   </>
                 )}
               </div>
               <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={cerrarModalTransferencia}>Cancelar</button>
-                <button className="btn btn-success" onClick={ejecutarTransferencia}>Transferir</button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={cerrarModalTransferencia}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="btn btn-success"
+                  onClick={ejecutarTransferencia}
+                >
+                  Transferir
+                </button>
               </div>
             </div>
           </div>
