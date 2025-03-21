@@ -224,6 +224,29 @@ app.put("/expedientes/transferir/:id", async (req, res) => {
   }
 });
 
+app.put("/expedientes/:id", async (req, res) => {
+  const { id } = req.params;
+  const datosActualizados = req.body;
+
+  try {
+    // Buscar el expediente por ID
+    const expediente = await Expedientes.findByPk(id);
+
+    if (!expediente) {
+      return res.status(404).json({ error: "Expediente no encontrado" });
+    }
+
+    // Actualizar el expediente con los datos recibidos
+    await expediente.update(datosActualizados);
+
+    return res.json(expediente);
+  } catch (error) {
+    console.error("Error al actualizar expediente:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+
 
 //---------------------------------Historial-----------------------------------------//
 // Obtener Historial
