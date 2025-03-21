@@ -95,23 +95,27 @@ export const ProviderExpediente: React.FC<ProviderExpedienteProps> = ({ children
   };
   
 
-  // Transferir un expediente a otra unidad
-  const transferirExpediente = async (id: number, nueva_unidad: string, id_usuario: number): Promise<void> => {
-    try {
-      const res = await fetch(`http://localhost:5000/expedientes/transferir/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nueva_unidad, id_usuario }),
-      });
-      if (!res.ok) throw new Error('No se pudo transferir el expediente.');
-      const expedienteTransferido = await res.json();
-      setExpedientes((prev) =>
-        prev.map((exp) => (exp.id_expediente === id ? expedienteTransferido : exp))
-      );
-    } catch (error) {
-      console.error('Error al transferir expediente:', error);
-    }
-  };
+// Transferir un expediente a otra unidad
+const transferirExpediente = async (id: number, nueva_unidad: string, id_usuario: number): Promise<void> => {
+  try {
+    const res = await fetch(`http://localhost:5000/expedientes/transferir/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nueva_unidad, id_usuario }),
+    });
+    if (!res.ok) throw new Error('No se pudo transferir el expediente.');
+    
+    // Se espera que el endpoint devuelva el expediente actualizado
+    const expedienteTransferido = await res.json();
+    
+    // Actualizar el estado de los expedientes: reemplazar el expediente con el id dado
+    setExpedientes((prev) =>
+      prev.map((exp) => (exp.id_expediente === id ? expedienteTransferido : exp))
+    );
+  } catch (error) {
+    console.error('Error al transferir expediente:', error);
+  }
+};
 
   // Obtener expedientes por usuario
 const obtenerExpedientesPorUsuario = async (id_usuario: number): Promise<void> => {

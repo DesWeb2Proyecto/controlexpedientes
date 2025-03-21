@@ -18,9 +18,7 @@ const ExpedientesUsuario: React.FC = () => {
 
   useEffect(() => {
     if (usuarioLogueado) {
-      obtenerExpedientesPorUsuario(usuarioLogueado.id_usuario).then(() =>
-        setCargando(false)
-      );
+      obtenerExpedientesPorUsuario(usuarioLogueado.id_usuario).then(() => setCargando(false));
     }
   }, [usuarioLogueado]);
 
@@ -43,13 +41,13 @@ const ExpedientesUsuario: React.FC = () => {
   };
 
   const abrirModalTransferencia = async (exp: Expediente) => {
-      setExpedienteTransferencia(exp);
-      await cargarUsuarios();
-    };
+    setExpedienteTransferencia(exp);
+    await cargarUsuarios();
+  };
 
   const cerrarModalTransferencia = () => {
-      setExpedienteTransferencia(null);
-      setUsuarioSeleccionado(null);
+    setExpedienteTransferencia(null);
+    setUsuarioSeleccionado(null);
   };
 
   const cerrarModal = () => {
@@ -69,27 +67,35 @@ const ExpedientesUsuario: React.FC = () => {
       await editarExpediente(expedienteEditando.id_expediente, formExpediente);
       cerrarModal();
       setMensajeExito("Expediente editado con éxito.");
-
-      // Ocultar el mensaje después de 3 segundos
       setTimeout(() => setMensajeExito(null), 5000);
     }
   };
 
   const manejarSeleccionUsuario = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const idSeleccionado = Number(e.target.value);
-      const usuarioEncontrado = usuarios.find((user) => user.id_usuario === idSeleccionado);
-      setUsuarioSeleccionado(usuarioEncontrado || null);
-    };
-  
-    const ejecutarTransferencia = async () => {
-      if (expedienteTransferencia && usuarioSeleccionado) {
-        await transferirExpediente(expedienteTransferencia.id_expediente, usuarioSeleccionado.unidad_area, usuarioSeleccionado.id_usuario);
-        cerrarModal();
+    const idSeleccionado = Number(e.target.value);
+    const usuarioEncontrado = usuarios.find((user) => user.id_usuario === idSeleccionado);
+    setUsuarioSeleccionado(usuarioEncontrado || null);
+  };
+
+  const ejecutarTransferencia = async () => {
+    if (expedienteTransferencia && usuarioSeleccionado) {
+      try {
+        // Aquí se llama al método del provider usando el ID del expediente,
+        // la unidad del usuario destino y el ID del usuario destino.
+        await transferirExpediente(
+          expedienteTransferencia.id_expediente,
+          usuarioSeleccionado.unidad_area,
+          usuarioSeleccionado.id_usuario
+        );
+        await obtenerExpedientesPorUsuario(usuarioLogueado?.id_usuario || 0);
+        cerrarModalTransferencia();
         setMensajeExito("Expediente transferido con éxito.");
-  
         setTimeout(() => setMensajeExito(null), 5000);
+      } catch (error) {
+        console.error("Error al ejecutar la transferencia:", error);
       }
-    };
+    }
+  };
 
   if (cargando) return <p className="text-center mt-4">Cargando expedientes...</p>;
 
@@ -197,6 +203,7 @@ const ExpedientesUsuario: React.FC = () => {
           </div>
         </div>
       )}
+
       {/* Modal de transferencia */}
       {expedienteTransferencia && (
         <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
@@ -217,7 +224,7 @@ const ExpedientesUsuario: React.FC = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Seleccionar Usuario Destino</label>
-                  <select className="form-select" onChange={manejarSeleccionUsuario}>
+                  <select className="form-select" onChange={manejarSeleccionUsuario} value={usuarioSeleccionado?.id_usuario || ""}>
                     <option value="">Seleccione un usuario</option>
                     {usuarios.map((user) => (
                       <option key={user.id_usuario} value={user.id_usuario}>
@@ -233,7 +240,7 @@ const ExpedientesUsuario: React.FC = () => {
                       <input type="text" className="form-control" value={usuarioSeleccionado.nombre_completo} disabled />
                     </div>
                     <div className="mb-3">
-                      <label className="form-label">Unidad Destino</label>
+                      <label className="form-label">Unidad del Usuario</label>
                       <input type="text" className="form-control" value={usuarioSeleccionado.unidad_area} disabled />
                     </div>
                   </>
@@ -241,9 +248,7 @@ const ExpedientesUsuario: React.FC = () => {
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={cerrarModalTransferencia}>Cancelar</button>
-                <button className="btn btn-primary" onClick={ejecutarTransferencia} disabled={!usuarioSeleccionado}>
-                  Transferir Expediente
-                </button>
+                <button className="btn btn-success" onClick={ejecutarTransferencia}>Transferir</button>
               </div>
             </div>
           </div>

@@ -194,7 +194,7 @@ app.get("/expedientes/usuario/:id", async (req, res) => {
   }
 });
 
-//transferir expediente
+// transferir expediente
 app.put("/expedientes/transferir/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -206,24 +206,44 @@ app.put("/expedientes/transferir/:id", async (req, res) => {
       return res.status(404).json({ mensaje: "Expediente no encontrado." });
     }
 
-    // Actualizar la unidad del expediente
-    expediente.unidad_area = nueva_unidad;
+    // Verificar si el usuario de destino existe
+    const usuarioDestino = await Users.findByPk(id_usuario);
+    if (!usuarioDestino) {
+      return res.status(404).json({ mensaje: "Usuario de destino no encontrado." });
+    }
+
+    // Verificar que el usuario de destino está en una unidad diferente
+    if (expediente.unidad_area === usuarioDestino.unidad_area) {
+      return res.status(400).json({ mensaje: "El expediente ya está en la unidad del usuario destino." });
+    }
+
+    // Actualizar la unidad del expediente a la unidad del usuario de destino
+    expediente.unidad_area = nueva_unidad;  // Utiliza 'nueva_unidad'
+    expediente.id_usuario = id_usuario;    // Asigna el expediente al nuevo usuario
     await expediente.save();
 
     // Registrar la transferencia en el historial
     await Historial.create({
       id_expediente: id,
       id_usuario: id_usuario,
-      comentario: `El Expediente #: ${expediente.numero_expediente} fue trasladado a la Unidad: ${nueva_unidad}`
+      comentario: `El Expediente #: ${expediente.numero_expediente} fue transferido a ${usuarioDestino.nombre_completo} en la Unidad: ${usuarioDestino.unidad_area}`,
+      fecha_transferencia: new Date(),
     });
 
-    res.json({ mensaje: "Expediente transferido correctamente." });
+    // Devuelve el expediente actualizado
+    res.json(expediente);  // Aquí devolvemos el expediente actualizado
+
   } catch (error) {
     console.error("Error al transferir expediente:", error);
-    res.status(500).json({ error: "Ocurrió un error en la petición." });
+    res.status(500).json({ error: "Ocurrió un error en la petición.", details: error.message });
   }
 });
 
+
+
+
+
+//actualizar expediente
 app.put("/expedientes/:id", async (req, res) => {
   const { id } = req.params;
   const datosActualizados = req.body;
@@ -336,6 +356,7 @@ app.get("/historial/usuario/:id_usuario", async (req, res) => {
           attributes: ["id_usuario", "nombre_completo", "nombre_usuario"],
         },
       ],
+      order: [["fecha_transferencia", "DESC"]], // Ordenar por fecha_transferencia de manera descendente
     });
 
     if (!historialUsuario.length) {
@@ -348,6 +369,7 @@ app.get("/historial/usuario/:id_usuario", async (req, res) => {
     res.status(500).json({ error: "Error en la consulta.", error });
   }
 });
+
 
 
 //historial detallado con datos del usuario y el expediente
