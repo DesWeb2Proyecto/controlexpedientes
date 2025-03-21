@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useUsuarioContext } from './Provider/ProviderUsuario';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import logoDGVM from '../../public/logoDGVMN.jpeg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function Page() {
@@ -35,6 +37,10 @@ export default function Page() {
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
       <div className="card shadow p-4" style={{ maxWidth: '400px', width: '100%' }}>
+        {/* Logo encima del formulario */}
+        <div className="text-center mb-3">
+          <Image src={logoDGVM} alt="Logo DGVM" width={200} height={75} className="mx-auto" />
+        </div>
         <h2 className="text-center mb-4">Iniciar sesión</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
