@@ -1,141 +1,125 @@
-'use client'
-import React, { ReactNode, useContext, useEffect, useState } from 'react'
-import { Expediente } from '../Models/Expediente'
-import { expedienteContext } from '../Context/ExpedienteContext'
+'use client';
+import React, { useState, useEffect, useContext } from 'react';
+import { expedienteContext } from '../Context/ExpedienteContext';
+import { Expediente } from '../Models/Expediente';
 
-interface VistaReact {
-  children: ReactNode
+interface ProviderExpedienteProps {
+  children: React.ReactNode;
 }
 
-export default function ProviderExpediente({ children }: VistaReact) {
-  const [expedientes, setExpedientes] = useState<Expediente[]>([])
-  const [id_expediente, setIdExpediente] = useState<number>(0)
-  const [numero_expediente, setNumeroExpediente] = useState<string>('')
-  const [nombre_establecimiento, setNombreEstablecimiento] = useState<string>('')
-  const [region_sanitaria, setRegionSanitaria] = useState<string>('')
-  const [departamento, setDepartamento] = useState<string>('')
-  const [unidad_area, setUnidadArea] = useState<string>('')
-  const [estado, setEstado] = useState<boolean>(true)
-  const [fecha_creacion, setFechaCreacion] = useState<string>('')
-  const [id_usuario, setIdUsuario] = useState<number>(0)
+export const ProviderExpediente: React.FC<ProviderExpedienteProps> = ({ children }) => {
+  const [expedientes, setExpedientes] = useState<Expediente[]>([]);
+  const [expedienteSeleccionado, setExpedienteSeleccionado] = useState<Expediente | null>(null);
 
-  useEffect(() => {
-    obtenerExpedientes()
-  }, [])
-
-  async function obtenerExpedientes() {
+  // Obtener todos los expedientes
+  const obtenerExpedientes = async (): Promise<void> => {
     try {
-      const res = await fetch('http://localhost:5000/expedientes')
-      const data = await res.json()
-      setExpedientes(data)
+      const res = await fetch('http://localhost:5000/expedientes');
+      if (!res.ok) throw new Error('No se pudo obtener los expedientes.');
+      const data = await res.json();
+      setExpedientes(data);
     } catch (error) {
-      alert('Ocurrió un error al obtener los expedientes: ' + error)
+      console.error('Error al obtener expedientes:', error);
     }
-  }
+  };
 
-  async function obtenerExpedientePorNumero(numero: string) {
+  // Obtener un expediente por su número
+  const obtenerExpedientePorNumero = async (numero: string): Promise<void> => {
     try {
-      const res = await fetch(`http://localhost:5000/expedientes/${numero}`)
-      const data = await res.json()
-      return data
+      const res = await fetch(`http://localhost:5000/expedientes/${numero}`);
+      if (!res.ok) throw new Error('Expediente no encontrado.');
+      const data = await res.json();
+      setExpedienteSeleccionado(data);
     } catch (error) {
-      alert('Error al obtener el expediente: ' + error)
+      console.error('Error al obtener expediente:', error);
     }
-  }
+  };
 
-  async function obtenerExpedientesPorUnidad(unidad: string) {
+  // Obtener expedientes por unidad
+  const obtenerExpedientesPorUnidad = async (unidad: string): Promise<void> => {
     try {
-      const res = await fetch(`http://localhost:5000/expedientes/unidad/${unidad}`)
-      const data = await res.json()
-      setExpedientes(data)
+      const res = await fetch(`http://localhost:5000/expedientes/unidad/${unidad}`);
+      if (!res.ok) throw new Error('No se pudieron obtener los expedientes por unidad.');
+      const data = await res.json();
+      setExpedientes(data);
     } catch (error) {
-      alert('Error al obtener expedientes por unidad: ' + error)
+      console.error('Error al obtener expedientes por unidad:', error);
     }
-  }
+  };
 
-  async function crearExpediente(expediente: Partial<Expediente>) {
-    if (!expediente.numero_expediente || !expediente.nombre_establecimiento || 
-        !expediente.region_sanitaria || !expediente.departamento || 
-        !expediente.unidad_area || !expediente.id_usuario) {
-      alert('Todos los campos obligatorios deben estar presentes.')
-      return
-    }
-
+  // Crear un nuevo expediente
+  const crearExpediente = async (expediente: Omit<Expediente, 'id_expediente' | 'fecha_creacion'>): Promise<void> => {
     try {
       const res = await fetch('http://localhost:5000/expedientes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expediente),
-      })
-      const data = await res.json()
-      setExpedientes([...expedientes, data.expediente])
+      });
+      if (!res.ok) throw new Error('Error al crear el expediente.');
+      const nuevoExpediente = await res.json();
+      setExpedientes((prev) => [...prev, nuevoExpediente]);
     } catch (error) {
-      alert('Error al crear expediente: ' + error)
+      console.error('Error al crear expediente:', error);
     }
-  }
+  };
 
-  async function editarExpediente(id: number, expediente: Partial<Expediente>) {
+  // Editar un expediente existente
+  const editarExpediente = async (id: number, expediente: Partial<Expediente>): Promise<void> => {
     try {
-      await fetch(`http://localhost:5000/expedientes/${id}`, {
+      const res = await fetch(`http://localhost:5000/expedientes/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expediente),
-      })
-      setExpedientes(expedientes.map((exp) => (exp.id_expediente === id ? { ...exp, ...expediente } : exp)))
+      });
+      if (!res.ok) throw new Error('No se pudo editar el expediente.');
+      const expedienteActualizado = await res.json();
+      setExpedientes((prev) =>
+        prev.map((exp) => (exp.id_expediente === id ? expedienteActualizado : exp))
+      );
     } catch (error) {
-      alert('Error al editar expediente: ' + error)
+      console.error('Error al editar expediente:', error);
     }
-  }
+  };
 
-  async function transferirExpediente(id: number, nueva_unidad: string, id_usuario: number) {
+  // Transferir un expediente a otra unidad
+  const transferirExpediente = async (id: number, nueva_unidad: string, id_usuario: number): Promise<void> => {
     try {
-      await fetch(`http://localhost:5000/expedientes/transferir/${id}`, {
+      const res = await fetch(`http://localhost:5000/expedientes/transferir/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nueva_unidad, id_usuario }),
-      })
-      setExpedientes(expedientes.map((exp) => (exp.id_expediente === id ? { ...exp, unidad_area: nueva_unidad } : exp)))
+      });
+      if (!res.ok) throw new Error('No se pudo transferir el expediente.');
+      const expedienteTransferido = await res.json();
+      setExpedientes((prev) =>
+        prev.map((exp) => (exp.id_expediente === id ? expedienteTransferido : exp))
+      );
     } catch (error) {
-      alert('Error al transferir expediente: ' + error)
+      console.error('Error al transferir expediente:', error);
     }
-  }
+  };
+
+  // Valor del contexto
+  const contextValue = {
+    expedientes,
+    setExpedientes,
+    obtenerExpedientes,
+    obtenerExpedientePorNumero,
+    obtenerExpedientesPorUnidad,
+    crearExpediente,
+    editarExpediente,
+    transferirExpediente,
+    expedienteSeleccionado,
+    setExpedienteSeleccionado,
+  };
 
   return (
-    <expedienteContext.Provider
-      value={{
-        expedientes,
-        setExpedientes,
-        obtenerExpedientes,
-        obtenerExpedientePorNumero,
-        obtenerExpedientesPorUnidad,
-        crearExpediente,
-        editarExpediente,
-        transferirExpediente,
-        id_expediente,
-        setIdExpediente,
-        numero_expediente,
-        setNumeroExpediente,
-        nombre_establecimiento,
-        setNombreEstablecimiento,
-        region_sanitaria,
-        setRegionSanitaria,
-        departamento,
-        setDepartamento,
-        unidad_area,
-        setUnidadArea,
-        estado,
-        setEstado,
-        fecha_creacion,
-        setFechaCreacion,
-        id_usuario,
-        setIdUsuario,
-      }}
-    >
+    <expedienteContext.Provider value={contextValue}>
       {children}
     </expedienteContext.Provider>
-  )
-}
+  );
+};
 
 export function useExpedienteContext() {
-  return useContext(expedienteContext)
+  return useContext(expedienteContext);
 }

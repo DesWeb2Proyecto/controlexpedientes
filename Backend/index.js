@@ -130,45 +130,52 @@ app.get("/expedientes/unidad/:unidad", async (req, res) => {
 });
 
 
-// Crear un nuevo expediente
 app.post("/expedientes", async (req, res) => {
   try {
-    const { numero_expediente, nombre_establecimiento, region_sanitaria, departamento, unidad_area, id_usuario } = req.body;
+      const {
+          numero_expediente,
+          nombre_establecimiento,
+          region_sanitaria,
+          departamento,
+          unidad_area,
+          estado,
+          id_usuario
+      } = req.body;
 
-    // Validar que los campos requeridos estén presentes
-    if (!numero_expediente || !nombre_establecimiento || !region_sanitaria || !departamento || !unidad_area || !id_usuario) {
-      return res.status(400).json({ mensaje: "Todos los campos son obligatorios." });
-    }
+      // Validaciones básicas
+      if (!numero_expediente || !nombre_establecimiento || !region_sanitaria || !departamento || !unidad_area || !id_usuario) {
+          return res.status(400).json({ error: "Todos los campos son obligatorios." });
+      }
 
-    // Verificar si el expediente ya existe
-    const expedienteExistente = await Expedientes.findOne({ where: { numero_expediente } });
-    if (expedienteExistente) {
-      return res.status(400).json({ mensaje: "El número de expediente ya está registrado." });
-    }
+      // Verificar si el expediente ya existe
+      const expedienteExiste = await Expedientes.findOne({ where: { numero_expediente } });
+      if (expedienteExiste) {
+          return res.status(400).json({ error: "El número de expediente ya existe." });
+      }
 
-    // Crear el nuevo expediente
-    const nuevoExpediente = await Expedientes.create({
-      numero_expediente,
-      nombre_establecimiento,
-      region_sanitaria,
-      departamento,
-      unidad_area,
-      estado: true, // Por defecto, el expediente está activo
-      fecha_creacion: new Date(),
-      id_usuario
-    });
+      // Crear expediente en la base de datos
+      const nuevoExpediente = await Expedientes.create({
+          numero_expediente,
+          nombre_establecimiento,
+          region_sanitaria,
+          departamento,
+          unidad_area,
+          estado: estado ?? true, // Si no se envía, será `true` por defecto
+          fecha_creacion: new Date(),
+          id_usuario
+      });
 
-    res.status(201).json({ mensaje: "Expediente creado exitosamente.", expediente: nuevoExpediente });
+      return res.status(201).json({ message: "Expediente creado exitosamente", expediente: nuevoExpediente });
   } catch (error) {
-    console.error("Error al crear expediente:", error);
-    res.status(500).json({ error: "Ocurrió un error en la petición." });
+      console.error("Error al crear el expediente:", error.message);
+      return res.status(500).json({ error: error.message });
   }
 });
 
+
 //editar expediente
-app.put("/expedientes/:id", async (req, res) => {
+app.post("/expedientes", async (req, res) => {
   try {
-    const { id } = req.params;
     const {
       numero_expediente,
       nombre_establecimiento,
@@ -179,27 +186,33 @@ app.put("/expedientes/:id", async (req, res) => {
       id_usuario
     } = req.body;
 
-    // Buscar el expediente por ID
-    const expediente = await Expedientes.findByPk(id);
-    if (!expediente) {
-      return res.status(404).json({ mensaje: "Expediente no encontrado." });
+    // Validaciones básicas
+    if (!numero_expediente || !nombre_establecimiento || !region_sanitaria || !departamento || !unidad_area || !id_usuario) {
+      return res.status(400).json({ error: "Todos los campos son obligatorios." });
     }
 
-    // Actualizar los campos del expediente
-    await expediente.update({
+    // Verificar si el expediente ya existe
+    const expedienteExiste = await Expedientes.findOne({ where: { numero_expediente } });
+    if (expedienteExiste) {
+      return res.status(400).json({ error: "El número de expediente ya existe." });
+    }
+
+    // Crear expediente en la base de datos
+    const nuevoExpediente = await Expedientes.create({
       numero_expediente,
       nombre_establecimiento,
       region_sanitaria,
       departamento,
       unidad_area,
-      estado,
+      estado: estado ?? true, // Si no se envía, será `true` por defecto
+      fecha_creacion: new Date(),
       id_usuario
     });
 
-    res.json({ mensaje: "Expediente actualizado correctamente.", expediente });
+    return res.status(201).json({ message: "Expediente creado exitosamente", expediente: nuevoExpediente });
   } catch (error) {
-    console.error("Error al actualizar expediente:", error);
-    res.status(500).json({ error: "Ocurrió un error en la petición." });
+    console.error("Error al crear el expediente:", error.message);
+    return res.status(500).json({ error: error.message });
   }
 });
 

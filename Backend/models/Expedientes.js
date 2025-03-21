@@ -19,7 +19,7 @@ const Expedientes = sequelize.define(
       allowNull: false,
     },
     region_sanitaria: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER, // Cambiado a INTEGER
       allowNull: false,
     },
     departamento: {
@@ -31,8 +31,9 @@ const Expedientes = sequelize.define(
       allowNull: false,
     },
     estado: {
-      type: DataTypes.STRING,
+      type: DataTypes.BOOLEAN, // Cambiado a BOOLEAN
       allowNull: false,
+      defaultValue: true, // Valor por defecto
     },
     fecha_creacion: {
       type: DataTypes.DATE,
@@ -44,13 +45,12 @@ const Expedientes = sequelize.define(
     },
   },
   {
-    timestamps: false,
-    tableName: "expediente",
+    timestamps: false, // Deshabilitado (opcional)
+    tableName: "expediente", // Nombre de la tabla en la base de datos
   }
 );
 
-// 📌 Relación con Usuarios
+// Relación con Usuarios
 Expedientes.belongsTo(Users, { foreignKey: "id_usuario" });
 
-// ✅ Exportamos sin definir relación con Historial aún
 module.exports = Expedientes;
