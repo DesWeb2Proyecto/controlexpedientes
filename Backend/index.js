@@ -194,7 +194,7 @@ app.get("/expedientes/usuario/:id", async (req, res) => {
   }
 });
 
-// transferir expediente
+//transferir expediente
 app.put("/expedientes/transferir/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -217,27 +217,52 @@ app.put("/expedientes/transferir/:id", async (req, res) => {
       return res.status(400).json({ mensaje: "El expediente ya está en la unidad del usuario destino." });
     }
 
-    // Actualizar la unidad del expediente a la unidad del usuario de destino
-    expediente.unidad_area = nueva_unidad;  // Utiliza 'nueva_unidad'
-    expediente.id_usuario = id_usuario;    // Asigna el expediente al nuevo usuario
+    // Guardar el ID del usuario que transfiere (original)
+    const originalUserId = expediente.id_usuario;
+
+    // Desactivar trigger temporalmente
+    await sequelize.query("SET @disable_trigger = 1");
+
+    // Actualizar la unidad del expediente y asignar el expediente al nuevo usuario
+    expediente.unidad_area = nueva_unidad;
+    expediente.id_usuario = id_usuario;
     await expediente.save();
 
-    // Registrar la transferencia en el historial
+    // Reactivar trigger
+    await sequelize.query("SET @disable_trigger = 0");
+
+    // Definir el comentario personalizado
+    const customComment = `El Expediente #: ${expediente.numero_expediente} fue transferido a ${usuarioDestino.nombre_completo} en la Unidad: ${usuarioDestino.unidad_area}`;
+
+    // Registrar en el historial el comentario para el usuario destino (nuevo registro)
     await Historial.create({
       id_expediente: id,
       id_usuario: id_usuario,
-      comentario: `El Expediente #: ${expediente.numero_expediente} fue transferido a ${usuarioDestino.nombre_completo} en la Unidad: ${usuarioDestino.unidad_area}`,
+      comentario: customComment,
       fecha_transferencia: new Date(),
     });
 
+    // Actualizar (o sobrescribir) la última entrada en el historial del usuario que transfiere
+    // para que su comentario refleje la transferencia
+    await Historial.update(
+      { comentario: customComment, fecha_transferencia: new Date() },
+      {
+        where: { id_expediente: id, id_usuario: originalUserId },
+        order: [['fecha_transferencia','DESC']],
+        limit: 1
+      }
+    );
+
     // Devuelve el expediente actualizado
-    res.json(expediente);  // Aquí devolvemos el expediente actualizado
+    res.json(expediente);
 
   } catch (error) {
     console.error("Error al transferir expediente:", error);
     res.status(500).json({ error: "Ocurrió un error en la petición.", details: error.message });
   }
 });
+
+
 
 
 

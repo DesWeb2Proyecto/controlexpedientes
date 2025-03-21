@@ -1,4 +1,3 @@
-'use client'
 import { createContext } from 'react';
 import { Expediente } from '../Models/Expediente';
 
